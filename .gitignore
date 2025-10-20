@@ -1,5 +1,39 @@
-.DS_Store
-Thumbs.db
+# Dependencies
+node_modules/
+vendor/
+
+# Environment specific
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+logs/
 *.log
+
+# Backup files
+*.bak
+*.tmp
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# WordPress core files (if developing in a WordPress environment)
+wp-content/cache/
+wp-content/upgrade/
+wp-content/uploads/
+*.wp-config.php
+wp-config.php
+
+# IDE specific
 .idea
 .vscode

@@ -2,3 +2,10 @@
  * All of the CSS for your public-facing functionality should be
  * included in this file.
  */
+
+.boilerplate-hello {
+	padding: 10px;
+	margin: 10px 0;
+	background-color: #f9f9f9;
+	border-left: 4px solid #0073aa;
+}

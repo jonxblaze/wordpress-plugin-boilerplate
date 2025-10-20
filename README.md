@@ -1,16 +1,20 @@
-# Boilerplate Plugin
-A clean, reusable boilerplate for WordPress plugins following best practices.
+# Refactored Boilerplate Plugin
+An improved, maintainable boilerplate for WordPress plugins following best practices.
 
 ## Description
 
-Boilerplate Plugin is a lightweight, well-structured starting point for building WordPress plugins. It follows WordPress coding standards and best practices, providing:
+The Refactored Boilerplate Plugin is a modern, well-structured starting point for building WordPress plugins. It follows WordPress coding standards and best practices, featuring:
 
-- Proper file organization (separates admin and public code)
-- Internationalization support (ready for translation)
-- Activation and deactivation hooks
-- Enqueueing of admin and public styles/scripts
-- Example shortcode ([boilerplate_hello]) for public use
-- Example admin notice
+- **Improved architecture**: Better separation of concerns with dedicated classes
+- **Configuration management**: Centralized settings and constants system
+- **Upgrade handling**: Built-in version upgrade management
+- **Error logging**: Proper logging for debugging and monitoring
+- **Internationalization support**: Ready for translation
+- **Activation and deactivation hooks**: Proper plugin lifecycle management
+- **Enqueueing of admin and public styles/scripts**: Proper asset handling
+- **Example shortcode** (`[boilerplate_hello]`): For public use
+- **Settings page**: With example configuration options
+- **Admin notice example**: Demonstrating admin area features
 
 ## Installation
 
@@ -29,19 +33,65 @@ This plugin is intended as a foundation for your own WordPress plugins. To use i
 ### Features
 
 - **Shortcode Example:** Use `[boilerplate_hello name="YourName"]` to display a "Hello World" message on the front end.
+- **Settings Page:** Accessible via Settings > Boilerplate Plugin in the admin area.
 - **Admin Notice Example:** Displays a sample notice on the plugins admin page.
 - **Hooks:** Easily register new actions and filters using the loader class.
 - **Internationalization:** Ready for translation via the `/languages` directory.
+- **Upgrade Management:** Automatic handling of version upgrades to ensure smooth transitions.
+
+### Architecture
+
+The refactored version includes several improvements over the basic boilerplate:
+
+1. **Constants Management**: All plugin constants in `class-boilerplate-constants.php`
+2. **Settings System**: Robust settings management via `class-boilerplate-settings.php`
+3. **Upgrade Handler**: Automatic version upgrade handling via `class-boilerplate-upgrade.php`
+4. **Utilities**: Common functions via `class-boilerplate-utils.php`
+5. **Enhanced Loader**: Improved hook management supporting shortcodes as well as actions/filters
+6. **Settings Page**: Built-in WordPress settings page with example configuration
 
 ## File Structure
 
-- `boilerplate-plugin.php` — Main plugin file
-- `includes/` — Core classes (loader, activator, deactivator, i18n)
-- `admin/` — Admin-specific classes, CSS, JS
-- `public/` — Public-facing classes, CSS, JS
-- `languages/` — Translation files
+```
+boilerplate-plugin/
+├── boilerplate-plugin.php — Main plugin file
+├── README.md
+├── .gitignore
+├── admin/ — Admin-specific classes, CSS, JS
+│   ├── class-boilerplate-admin.php
+│   ├── css/
+│   │   └── boilerplate-plugin-admin.css
+│   └── js/
+│       └── boilerplate-plugin-admin.js
+├── includes/ — Core classes
+│   ├── class-boilerplate-plugin.php — Main plugin class
+│   ├── class-boilerplate-constants.php — Plugin constants
+│   ├── class-boilerplate-settings.php — Settings management
+│   ├── class-boilerplate-upgrade.php — Upgrade handling
+│   ├── class-boilerplate-utils.php — Utility functions
+│   ├── class-boilerplate-loader.php — Hook loader
+│   ├── class-boilerplate-i18n.php — Internationalization
+│   ├── class-boilerplate-activator.php — Plugin activation
+│   └── class-boilerplate-deactivator.php — Plugin deactivation
+├── languages/ — Translation files
+└── public/ — Public-facing classes, CSS, JS
+    ├── class-boilerplate-public.php
+    ├── css/
+    │   └── boilerplate-plugin-public.css
+    └── js/
+        └── boilerplate-plugin-public.js
+```
 
 ## Changelog
+
+### 2.0.0
+* Complete refactoring for better maintainability
+* Added centralized configuration system
+* Implemented settings management
+* Added upgrade management system
+* Improved error logging
+* Added WordPress settings page
+* Enhanced file organization
 
 ### 1.0.0
 * Initial release
