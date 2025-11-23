@@ -37,11 +37,11 @@ class Boilerplate_Upgrade {
 	 */
 	private static function perform_upgrade( $old_version, $new_version ) {
 		// Log the upgrade
-		error_log( sprintf(
-			'Boilerplate Plugin: Upgrading from %s to %s',
+		Boilerplate_Utils::log( sprintf(
+			'Upgrading from %s to %s',
 			$old_version,
 			$new_version
-		) );
+		), 'info' );
 
 		// Handle specific version upgrades
 		if ( version_compare( $old_version, '2.0.0', '<' ) ) {
@@ -49,6 +49,13 @@ class Boilerplate_Upgrade {
 		}
 
 		// Add more version-specific upgrade functions as needed
+		
+		// Log successful upgrade
+		Boilerplate_Utils::log( sprintf(
+			'Successfully upgraded from %s to %s',
+			$old_version,
+			$new_version
+		), 'info' );
 	}
 
 	/**

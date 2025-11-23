@@ -1,0 +1,8 @@
+# Modules Directory
+
+This directory contains modular functionality for the plugin.
+Each module should be in its own subdirectory following the pattern:
+/modules/custom-function-1/
+/modules/custom-function-2/
+
+Modules will be automatically loaded by the plugin.

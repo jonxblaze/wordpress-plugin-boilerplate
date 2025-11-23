@@ -134,7 +134,13 @@ class Boilerplate_Admin {
 	 * @since    2.0.0
 	 */
 	public function init_settings() {
-		register_setting( 'boilerplate_settings', Boilerplate_Constants::OPTION_NAME );
+		register_setting( 
+			'boilerplate_settings', 
+			Boilerplate_Constants::OPTION_NAME,
+			array(
+				'sanitize_callback' => array( $this, 'sanitize_settings' )
+			)
+		);
 
 		add_settings_section(
 			'boilerplate_main_settings',
@@ -149,6 +155,22 @@ class Boilerplate_Admin {
 			array( $this, 'example_setting_callback' ),
 			'boilerplate-plugin',
 			'boilerplate_main_settings'
+		);
+
+		// Module Management Section
+		add_settings_section(
+			'boilerplate_module_settings',
+			'Module Management',
+			array( $this, 'module_settings_section_callback' ),
+			'boilerplate-plugin'
+		);
+
+		add_settings_field(
+			'enabled_modules',
+			'Enabled Modules',
+			array( $this, 'enabled_modules_callback' ),
+			'boilerplate-plugin',
+			'boilerplate_module_settings'
 		);
 	}
 
@@ -174,6 +196,137 @@ class Boilerplate_Admin {
 			   class="regular-text" />
 		<p class="description">An example setting field.</p>
 		<?php
+	}
+
+	/**
+	 * Module settings section callback.
+	 *
+	 * @since    2.0.0
+	 */
+	public function module_settings_section_callback() {
+		echo '<p>Enable or disable plugin modules. Disabled modules will not be loaded.</p>';
+	}
+
+	/**
+	 * Enabled modules callback.
+	 *
+	 * @since    2.0.0
+	 */
+	public function enabled_modules_callback() {
+		$enabled_modules = $this->settings->get( 'enabled_modules', array() );
+		$module_manager = Boilerplate_Module_Manager::instance();
+		$available_modules = $this->get_available_modules();
+		
+		if ( empty( $available_modules ) ) {
+			echo '<p>No modules found in the modules directory.</p>';
+			return;
+		}
+		
+		foreach ( $available_modules as $module_name => $module_info ) {
+			$is_enabled = in_array( $module_name, $enabled_modules, true );
+			$is_loaded = $module_manager->has_module( $module_name );
+			$status_class = $is_loaded ? 'module-status-loaded' : 'module-status-disabled';
+			$status_text = $is_loaded ? '✓ Loaded' : '✗ Disabled';
+			?>
+			<div class="module-checkbox-wrapper">
+				<label>
+					<input type="checkbox" 
+						   name="<?php echo esc_attr( Boilerplate_Constants::OPTION_NAME ); ?>[enabled_modules][]" 
+						   value="<?php echo esc_attr( $module_name ); ?>" 
+						   <?php checked( $is_enabled ); ?> />
+					<strong><?php echo esc_html( $module_info['name'] ); ?></strong>
+					<span class="module-status <?php echo esc_attr( $status_class ); ?>"><?php echo esc_html( $status_text ); ?></span>
+				</label>
+				<?php if ( ! empty( $module_info['description'] ) ) : ?>
+					<p class="description"><?php echo esc_html( $module_info['description'] ); ?></p>
+				<?php endif; ?>
+			</div>
+			<?php
+		}
+	}
+
+	/**
+	 * Get available modules from the modules directory.
+	 *
+	 * @since    2.0.0
+	 * @return   array
+	 */
+	private function get_available_modules() {
+		$modules = array();
+		$modules_dir = Boilerplate_Constants::plugin_dir( 'modules' );
+		
+		if ( ! is_dir( $modules_dir ) ) {
+			return $modules;
+		}
+		
+		$module_dirs = glob( $modules_dir . '/*', GLOB_ONLYDIR );
+		
+		foreach ( $module_dirs as $module_dir ) {
+			$module_name = basename( $module_dir );
+			$module_file = $module_dir . '/class-boilerplate-module-' . $module_name . '.php';
+			
+			if ( file_exists( $module_file ) ) {
+				$modules[ $module_name ] = array(
+					'name' => $this->format_module_name( $module_name ),
+					'description' => $this->get_module_description( $module_file ),
+				);
+			}
+		}
+		
+		return $modules;
+	}
+
+	/**
+	 * Format module name for display.
+	 *
+	 * @since    2.0.0
+	 * @param    string $module_name Module directory name.
+	 * @return   string
+	 */
+	private function format_module_name( $module_name ) {
+		// Convert dashes and underscores to spaces, then capitalize
+		$name = str_replace( array( '-', '_' ), ' ', $module_name );
+		return ucwords( $name );
+	}
+
+	/**
+	 * Get module description from file header.
+	 *
+	 * @since    2.0.0
+	 * @param    string $module_file Module file path.
+	 * @return   string
+	 */
+	private function get_module_description( $module_file ) {
+		$default_headers = array(
+			'description' => 'Description',
+		);
+		
+		$file_data = get_file_data( $module_file, $default_headers );
+		return $file_data['description'] ?? '';
+	}
+
+	/**
+	 * Sanitize settings before saving.
+	 *
+	 * @since    2.0.0
+	 * @param    array $input The settings input.
+	 * @return   array Sanitized settings.
+	 */
+	public function sanitize_settings( $input ) {
+		$sanitized_input = array();
+		
+		if ( is_array( $input ) ) {
+			foreach ( $input as $key => $value ) {
+				if ( 'enabled_modules' === $key && is_array( $value ) ) {
+					// Sanitize each module name in the enabled_modules array
+					$sanitized_input[ $key ] = array_map( 'sanitize_text_field', $value );
+				} else {
+					$sanitized_input[ $key ] = sanitize_text_field( $value );
+				}
+			}
+		}
+		
+		return $sanitized_input;
 	}
 
 	/**

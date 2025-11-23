@@ -68,6 +68,15 @@ class Boilerplate_Plugin {
 	protected $settings;
 
 	/**
+	 * Module manager instance.
+	 *
+	 * @since    2.0.0
+	 * @access   protected
+	 * @var      Boilerplate_Module_Manager    $module_manager    Plugin module manager.
+	 */
+	protected $module_manager;
+
+	/**
 	 * Define the core functionality of the plugin.
 	 *
 	 * Set the plugin name and the plugin version that can be used throughout the plugin.
@@ -99,6 +108,7 @@ class Boilerplate_Plugin {
 	 * - Boilerplate_Settings. Manages plugin settings.
 	 * - Boilerplate_Upgrade. Handles plugin upgrades.
 	 * - Boilerplate_Utils. Provides utility functions.
+	 * - Boilerplate_Module_Manager. Manages plugin modules.
 	 *
 	 * Create an instance of the loader which will be used to register the hooks
 	 * with WordPress.
@@ -112,6 +122,7 @@ class Boilerplate_Plugin {
 		require_once Boilerplate_Constants::plugin_dir( 'includes/class-boilerplate-utils.php' );
 		require_once Boilerplate_Constants::plugin_dir( 'includes/class-boilerplate-settings.php' );
 		require_once Boilerplate_Constants::plugin_dir( 'includes/class-boilerplate-upgrade.php' );
+		require_once Boilerplate_Constants::plugin_dir( 'includes/class-boilerplate-module-manager.php' );
 
 		// Include the loader
 		require_once Boilerplate_Constants::plugin_dir( 'includes/class-boilerplate-loader.php' );
@@ -120,12 +131,15 @@ class Boilerplate_Plugin {
 		// Initialize settings
 		$this->settings = Boilerplate_Settings::instance();
 
+		// Initialize module manager
+		$this->module_manager = Boilerplate_Module_Manager::instance();
+
 		// Include internationalization
 		require_once Boilerplate_Constants::plugin_dir( 'includes/class-boilerplate-i18n.php' );
 
 		// Include admin and public classes
-		require_once Boilerplate_Constants::plugin_dir( 'admin/class-boilerplate-admin.php' );
-		require_once Boilerplate_Constants::plugin_dir( 'public/class-boilerplate-public.php' );
+		require_once Boilerplate_Constants::plugin_dir( 'admin/class-boilerplate-plugin-admin.php' );
+		require_once Boilerplate_Constants::plugin_dir( 'public/class-boilerplate-plugin-public.php' );
 	}
 
 	/**
@@ -194,6 +208,18 @@ class Boilerplate_Plugin {
 	private function define_hooks() {
 		// Handle upgrades on plugin activation/initialization
 		$this->loader->add_action( 'plugins_loaded', $this, 'maybe_upgrade' );
+		
+		// Initialize modules after plugins are loaded
+		$this->loader->add_action( 'plugins_loaded', $this, 'init_modules' );
+	}
+
+	/**
+	 * Initialize all loaded modules.
+	 *
+	 * @since    2.0.0
+	 */
+	public function init_modules() {
+		$this->module_manager->init_modules();
 	}
 
 	/**

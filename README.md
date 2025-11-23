@@ -1,138 +1,200 @@
-# Refactored Boilerplate Plugin
-An improved, maintainable boilerplate for WordPress plugins following best practices.
+# WordPress Plugin Boilerplate
 
-## Description
+A clean, reusable boilerplate for WordPress plugins following best practices. This boilerplate has been refactored to follow WordPress coding standards and security best practices.
 
-The Refactored Boilerplate Plugin is a modern, well-structured starting point for building WordPress plugins. It follows WordPress coding standards and best practices, featuring:
+## Features
 
-- **Improved architecture**: Better separation of concerns with dedicated classes
-- **Configuration management**: Centralized settings and constants system
-- **Upgrade handling**: Built-in version upgrade management
-- **Error logging**: Proper logging for debugging and monitoring
-- **Internationalization support**: Ready for translation
-- **Activation and deactivation hooks**: Proper plugin lifecycle management
-- **Enqueueing of admin and public styles/scripts**: Proper asset handling
-- **Example shortcode** (`[boilerplate_hello]`): For public use
-- **Settings page**: With example configuration options
-- **Admin notice example**: Demonstrating admin area features
+- **Modern Architecture**: Object-oriented design with proper separation of concerns
+- **Security First**: Input validation, sanitization, and proper escaping
+- **Internationalization Ready**: Full support for translations
+- **Settings Management**: Robust settings system with proper sanitization
+- **Upgrade Handling**: Version-based upgrade system
+- **Logging**: Built-in debug logging system
+- **Admin Interface**: Clean admin interface with proper security
+- **Public-facing Features**: Proper asset enqueueing and shortcode support
 
-## Installation
+## Code Quality Improvements
 
-1. Upload the plugin files to the `/wp-content/plugins/boilerplate-plugin` directory, or install via the WordPress plugins screen.
-2. Activate the plugin through the 'Plugins' screen in WordPress.
+### Security Enhancements
+- **Input Sanitization**: All settings are properly sanitized before saving
+- **Output Escaping**: All output is properly escaped using WordPress functions
+- **Nonce Verification**: Settings forms include proper nonce verification
+- **Capability Checks**: Admin pages check for proper user capabilities
 
-## Usage
+### Code Standards
+- **WordPress Coding Standards**: Follows WordPress PHP and JavaScript coding standards
+- **Proper Documentation**: Comprehensive PHPDoc comments
+- **Consistent Naming**: Consistent file and class naming conventions
+- **Error Handling**: Proper error logging and handling
 
-This plugin is intended as a foundation for your own WordPress plugins. To use it:
-
-1. Copy the plugin directory and rename it to match your plugin's name.
-2. Rename all files and classes to match your plugin's name.
-3. Update the plugin header information in the main plugin file.
-4. Customize the functionality as needed (add features, hooks, etc).
-
-### Features
-
-- **Shortcode Example:** Use `[boilerplate_hello name="YourName"]` to display a "Hello World" message on the front end.
-- **Settings Page:** Accessible via Settings > Boilerplate Plugin in the admin area.
-- **Admin Notice Example:** Displays a sample notice on the plugins admin page.
-- **Hooks:** Easily register new actions and filters using the loader class.
-- **Internationalization:** Ready for translation via the `/languages` directory.
-- **Upgrade Management:** Automatic handling of version upgrades to ensure smooth transitions.
-
-### Architecture
-
-The refactored version includes several improvements over the basic boilerplate:
-
-1. **Constants Management**: All plugin constants in `class-boilerplate-constants.php`
-2. **Settings System**: Robust settings management via `class-boilerplate-settings.php`
-3. **Upgrade Handler**: Automatic version upgrade handling via `class-boilerplate-upgrade.php`
-4. **Utilities**: Common functions via `class-boilerplate-utils.php`
-5. **Enhanced Loader**: Improved hook management supporting shortcodes as well as actions/filters
-6. **Settings Page**: Built-in WordPress settings page with example configuration
+### Architecture Improvements
+- **Singleton Pattern**: Settings class uses proper singleton pattern
+- **Dependency Injection**: Proper dependency management
+- **Hook System**: Flexible action and filter hook system
+- **Constants Management**: Centralized constants management
 
 ## File Structure
 
 ```
-boilerplate-plugin/
-├── boilerplate-plugin.php — Main plugin file
-├── README.md
-├── .gitignore
-├── admin/ — Admin-specific classes, CSS, JS
-│   ├── class-boilerplate-admin.php
+wordpress-plugin-boilerplate/
+├── boilerplate-plugin.php          # Main plugin file
+├── README.md                       # This file
+├── admin/                          # Admin functionality
+│   ├── class-boilerplate-plugin-admin.php
 │   ├── css/
 │   │   └── boilerplate-plugin-admin.css
 │   └── js/
 │       └── boilerplate-plugin-admin.js
-├── includes/ — Core classes
-│   ├── class-boilerplate-plugin.php — Main plugin class
-│   ├── class-boilerplate-constants.php — Plugin constants
-│   ├── class-boilerplate-settings.php — Settings management
-│   ├── class-boilerplate-upgrade.php — Upgrade handling
-│   ├── class-boilerplate-utils.php — Utility functions
-│   ├── class-boilerplate-loader.php — Hook loader
-│   ├── class-boilerplate-i18n.php — Internationalization
-│   ├── class-boilerplate-activator.php — Plugin activation
-│   └── class-boilerplate-deactivator.php — Plugin deactivation
-├── languages/ — Translation files
-└── public/ — Public-facing classes, CSS, JS
-    ├── class-boilerplate-public.php
+├── includes/                       # Core plugin classes
+│   ├── class-boilerplate-constants.php
+│   ├── class-boilerplate-plugin-activator.php
+│   ├── class-boilerplate-plugin-deactivator.php
+│   ├── class-boilerplate-plugin-i18n.php
+│   ├── class-boilerplate-plugin-loader.php
+│   ├── class-boilerplate-plugin.php
+│   ├── class-boilerplate-settings.php
+│   ├── class-boilerplate-upgrade.php
+│   ├── class-boilerplate-utils.php
+│   └── class-boilerplate-module-manager.php
+├── languages/                      # Translation files
+│   └── .gitkeep
+├── modules/                        # Modular functionality
+│   ├── .gitkeep
+│   └── example-module/             # Example module
+│       └── class-boilerplate-module-example-module.php
+└── public/                         # Public-facing functionality
+    ├── class-boilerplate-plugin-public.php
     ├── css/
     │   └── boilerplate-plugin-public.css
     └── js/
         └── boilerplate-plugin-public.js
 ```
 
-## Changelog
+## Installation
 
-### 2.0.0
-* Complete refactoring for better maintainability
-* Added centralized configuration system
-* Implemented settings management
-* Added upgrade management system
-* Improved error logging
-* Added WordPress settings page
-* Enhanced file organization
+1. Upload the plugin files to `/wp-content/plugins/boilerplate-plugin`
+2. Activate the plugin through the 'Plugins' screen in WordPress
+3. Configure the plugin settings under Settings > Boilerplate Plugin
 
-### 1.0.0
-* Initial release
+## Usage
 
-## Frequently Asked Questions
+### For Developers
 
-### How do I customize this plugin for my own needs?
+This boilerplate provides a solid foundation for building WordPress plugins. Key features include:
 
-1. Rename the plugin directory
-2. Rename all files and classes
-3. Update the plugin header information
-4. Modify/add functionality as needed
-5. Update text domain references
+#### Settings Management
+```php
+// Get a setting value
+$settings = Boilerplate_Settings::instance();
+$value = $settings->get( 'example_setting', 'default_value' );
 
-### Does this plugin include any database functionality?
+// Set a setting value
+$settings->set( 'example_setting', 'new_value' );
+$settings->save();
+```
 
-No, this boilerplate does not include any database functionality. You can add your own database operations as needed.
+#### Hook System
+```php
+// Add actions
+$this->loader->add_action( 'hook_name', $component, 'callback_method', $priority, $accepted_args );
 
-### How do I add my own functionality?
+// Add filters  
+$this->loader->add_filter( 'filter_name', $component, 'callback_method', $priority, $accepted_args );
 
-Add your own features by:
-- Adding new methods to the admin and public classes
-- Registering new hooks in the loader
-- Creating new classes as needed
-- Following the existing patterns for consistency
+// Add shortcodes
+$this->loader->add_shortcode( 'shortcode_tag', $component, 'callback_method' );
+```
+
+#### Logging
+```php
+// Log messages (only when WP_DEBUG is true)
+Boilerplate_Utils::log( 'Plugin activated successfully', 'info' );
+Boilerplate_Utils::log( 'Something went wrong', 'error' );
+```
+
+#### Modular Architecture
+The plugin now supports a modular architecture where additional functionality can be added through modules.
+
+**Creating a Module:**
+1. Create a directory in `/modules/` (e.g., `/modules/custom-function-1/`)
+2. Create a class file following the naming convention: `class-boilerplate-module-custom-function-1.php`
+3. The class should follow the naming convention: `Boilerplate_Module_CustomFunction1`
+4. Implement an `init()` method for module initialization
+
+**Example Module Structure:**
+```php
+class Boilerplate_Module_CustomFunction1 {
+    
+    public function __construct() {
+        $this->name = 'custom-function-1';
+        $this->version = '1.0.0';
+    }
+    
+    public function init() {
+        // Register hooks, filters, shortcodes, etc.
+        add_action( 'init', array( $this, 'register_shortcodes' ) );
+        add_filter( 'the_content', array( $this, 'modify_content' ) );
+    }
+    
+    // Your module methods here...
+}
+```
+
+**Module Manager:**
+```php
+// Get module manager instance
+$module_manager = Boilerplate_Module_Manager::instance();
+
+// Get all loaded modules
+$modules = $module_manager->get_modules();
+
+// Check if a specific module is loaded
+if ( $module_manager->has_module( 'custom-function-1' ) ) {
+    // Module is available
+    $module = $module_manager->get_module( 'custom-function-1' );
+}
+```
+
+## Security Best Practices Implemented
+
+1. **Input Validation**: All user input is validated and sanitized
+2. **Output Escaping**: All output uses proper escaping functions
+3. **Nonce Verification**: Forms include WordPress nonce verification
+4. **Capability Checks**: Admin functions check user capabilities
+5. **SQL Injection Prevention**: Uses WordPress database functions
+6. **XSS Prevention**: Proper escaping of all output
+7. **CSRF Protection**: Nonce verification on all forms
+
+## WordPress Coding Standards
+
+This plugin follows WordPress coding standards:
+
+- **PHP**: Follows WordPress PHP coding standards
+- **JavaScript**: Follows WordPress JavaScript coding standards  
+- **CSS**: Follows WordPress CSS coding standards
+- **Documentation**: Comprehensive PHPDoc comments
+- **Naming**: Consistent naming conventions
 
 ## Contributing
 
-Contributions are welcome! Please submit a Pull Request.
+When contributing to this boilerplate:
 
-### How to Contribute
-
-1. Fork the repository and create your branch from `main`.
-2. Make your changes, following WordPress coding standards.
-3. Test your changes to ensure they do not break existing functionality.
-4. Submit a Pull Request with a clear description of your changes.
-
-### Submitting Issues
-
-If you find a bug or have a feature request, please open an issue and provide as much detail as possible, including steps to reproduce, expected behavior, and screenshots if applicable.
+1. Follow WordPress coding standards
+2. Add proper PHPDoc comments
+3. Include security measures for all user input
+4. Test thoroughly before submitting
+5. Update documentation as needed
 
 ## License
 
-GPL-2.0+
+This project is licensed under the GPL v2 or later.
+
+## Changelog
+
+### 2.0.0
+- Refactored code following WordPress best practices
+- Enhanced security with proper input sanitization
+- Improved code documentation
+- Fixed file naming inconsistencies
+- Added comprehensive logging system
+- Improved settings management with proper sanitization callbacks

@@ -47,7 +47,7 @@ class Boilerplate_Settings {
 	 * Private unserialize method to prevent unserializing of the *Singleton*
 	 * instance.
 	 */
-	private function __wakeup() {}
+	public function __wakeup() {}
 
 	/**
 	 * Return an instance of this class.
@@ -66,6 +66,14 @@ class Boilerplate_Settings {
 	 */
 	private function load_settings() {
 		$saved_settings = get_option( Boilerplate_Constants::OPTION_NAME, array() );
+		
+		// Sanitize loaded settings
+		if ( is_array( $saved_settings ) ) {
+			$saved_settings = Boilerplate_Utils::sanitize_array( $saved_settings );
+		} else {
+			$saved_settings = array();
+		}
+		
 		$this->settings = wp_parse_args( $saved_settings, $this->get_defaults() );
 	}
 
@@ -77,6 +85,7 @@ class Boilerplate_Settings {
 	private function get_defaults() {
 		return array(
 			'version' => Boilerplate_Constants::VERSION,
+			'enabled_modules' => array(),
 		);
 	}
 

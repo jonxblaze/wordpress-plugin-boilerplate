@@ -31,11 +31,6 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-/**
- * Currently plugin version.
- * Start at version 2.0.0 and use SemVer - https://semver.org
- */
-define( 'BOILERPLATE_PLUGIN_VERSION', '2.0.0' );
 
 /**
  * The code that runs during plugin activation.

@@ -32,13 +32,13 @@ class Boilerplate_Activator {
 	 */
 	public static function activate() {
 		// Set the version on activation
-		update_option( 'boilerplate_version', '2.0.0' );
+		update_option( Boilerplate_Constants::VERSION_OPTION, Boilerplate_Constants::VERSION );
 		
 		// Initialize default settings
 		$defaults = array(
-			'version' => '2.0.0',
+			'version' => Boilerplate_Constants::VERSION,
 		);
-		add_option( 'boilerplate_settings', $defaults );
+		add_option( Boilerplate_Constants::OPTION_NAME, $defaults );
 		
 		// Add any other activation tasks here
 		Boilerplate_Utils::log( 'Boilerplate Plugin activated successfully' );
