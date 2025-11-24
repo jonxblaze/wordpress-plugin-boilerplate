@@ -9,9 +9,10 @@ A clean, reusable boilerplate for WordPress plugins following best practices. Th
 - **Internationalization Ready**: Full support for translations
 - **Settings Management**: Robust settings system with proper sanitization
 - **Upgrade Handling**: Version-based upgrade system
-- **Logging**: Built-in debug logging system
 - **Admin Interface**: Clean admin interface with proper security
 - **Public-facing Features**: Proper asset enqueueing and shortcode support
+- **Modular Architecture**: Plugin modules that can be enabled/disabled
+- **Module Boilerplate**: Template for creating new modules easily
 
 ## Code Quality Improvements
 
@@ -120,23 +121,44 @@ The plugin now supports a modular architecture where additional functionality ca
 2. Create a class file following the naming convention: `class-boilerplate-module-custom-function-1.php`
 3. The class should follow the naming convention: `Boilerplate_Module_CustomFunction1`
 4. Implement an `init()` method for module initialization
+5. Include runtime checks in all module functionality to verify if the module is enabled
+
+**Runtime Checks:**
+To ensure module functionality is disabled when the module is toggled off, include runtime checks in all module methods:
+```php
+public function some_module_function() {
+    // Check if module is enabled before executing functionality
+    $settings = Boilerplate_Settings::instance();
+    $enabled_modules = $settings->get( 'enabled_modules', array() );
+
+    if ( ! in_array( 'custom-function-1', $enabled_modules, true ) ) {
+        return; // Module is disabled, don't execute functionality
+    }
+
+    // Your module functionality here...
+}
+```
 
 **Example Module Structure:**
 ```php
 class Boilerplate_Module_CustomFunction1 {
-    
+
     public function __construct() {
         $this->name = 'custom-function-1';
         $this->version = '1.0.0';
     }
-    
+
     public function init() {
         // Register hooks, filters, shortcodes, etc.
         add_action( 'init', array( $this, 'register_shortcodes' ) );
         add_filter( 'the_content', array( $this, 'modify_content' ) );
     }
-    
-    // Your module methods here...
+
+    // Your module methods here with runtime checks...
+
+    public function cleanup() {
+        // Optional: cleanup functionality when module is disabled
+    }
 }
 ```
 
@@ -154,6 +176,9 @@ if ( $module_manager->has_module( 'custom-function-1' ) ) {
     $module = $module_manager->get_module( 'custom-function-1' );
 }
 ```
+
+**Module Boilerplate:**
+A template module is provided in `/modules/module-boilerplate/` that can be copied and customized to create new modules quickly.
 
 ## Security Best Practices Implemented
 
@@ -190,6 +215,17 @@ When contributing to this boilerplate:
 This project is licensed under the GPL v2 or later.
 
 ## Changelog
+
+### 2.0.1
+- Added My Shortcode module as an example module
+- Created module boilerplate template for easy module creation
+- Implemented runtime checks in modules to verify enabled status
+- Removed example setting field from plugin settings
+- Fixed module management settings display
+- Enhanced module toggle functionality with immediate visual feedback
+- Ensured modules are properly reloaded when settings are saved
+- Added module cleanup functionality
+- Updated documentation with module runtime checks information
 
 ### 2.0.0
 - Refactored code following WordPress best practices

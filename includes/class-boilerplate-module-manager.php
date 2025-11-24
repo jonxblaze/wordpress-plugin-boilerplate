@@ -115,10 +115,38 @@ class Boilerplate_Module_Manager {
 				if ( file_exists( $module_file ) && $is_enabled ) {
 					$this->load_module( $module_name, $module_file );
 				} elseif ( file_exists( $module_file ) && ! $is_enabled ) {
-					Boilerplate_Utils::log( sprintf( 'Module disabled: %s', $module_name ), 'info' );
+					// Module is disabled, no action needed
 				}
 			}
 		}
+	}
+
+	/**
+	 * Reload modules based on current settings.
+	 * This should be called after settings are updated.
+	 *
+	 * @since 2.0.0
+	 */
+	public function reload_modules() {
+		// Clean up currently loaded modules before clearing them
+		foreach ( $this->modules as $module_name => $module ) {
+			if ( method_exists( $module, 'cleanup' ) ) {
+				try {
+					$module->cleanup();
+				} catch ( Exception $e ) {
+					Boilerplate_Utils::log( sprintf( 'Failed to cleanup module %s: %s', $module_name, $e->getMessage() ), 'error' );
+				}
+			}
+		}
+
+		// Clear current modules
+		$this->modules = array();
+
+		// Reload modules based on current settings
+		$this->load_modules();
+
+		// Re-initialize modules
+		$this->init_modules();
 	}
 
 	/**
@@ -136,7 +164,6 @@ class Boilerplate_Module_Manager {
 			try {
 				$module_instance = new $class_name();
 				$this->modules[ $module_name ] = $module_instance;
-				Boilerplate_Utils::log( sprintf( 'Module loaded: %s', $module_name ), 'info' );
 			} catch ( Exception $e ) {
 				Boilerplate_Utils::log( sprintf( 'Failed to load module %s: %s', $module_name, $e->getMessage() ), 'error' );
 			}
@@ -196,7 +223,6 @@ class Boilerplate_Module_Manager {
 			if ( method_exists( $module, 'init' ) ) {
 				try {
 					$module->init();
-					Boilerplate_Utils::log( sprintf( 'Module initialized: %s', $module_name ), 'info' );
 				} catch ( Exception $e ) {
 					Boilerplate_Utils::log( sprintf( 'Failed to initialize module %s: %s', $module_name, $e->getMessage() ), 'error' );
 				}

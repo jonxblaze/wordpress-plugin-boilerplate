@@ -65,8 +65,6 @@ class Boilerplate_Module_ExampleModule {
 		// Add your initialization code here
 		$this->register_hooks();
 		$this->register_shortcodes();
-		
-		Boilerplate_Utils::log( sprintf( 'Example Module initialized: %s', $this->name ), 'info' );
 	}
 
 	/**
@@ -105,6 +103,15 @@ class Boilerplate_Module_ExampleModule {
 	 * @since    2.0.0
 	 */
 	public function add_custom_meta() {
+		// Check if this module is currently enabled before adding meta
+		$settings = Boilerplate_Settings::instance();
+		$enabled_modules = $settings->get( 'enabled_modules', array() );
+
+		// If this module is not in the enabled modules list, don't output anything
+		if ( ! in_array( 'example-module', $enabled_modules, true ) ) {
+			return; // Module is disabled, don't output anything
+		}
+
 		echo '<meta name="example-module" content="This is from the example module" />' . "\n";
 	}
 
@@ -116,12 +123,21 @@ class Boilerplate_Module_ExampleModule {
 	 * @return   string Modified post content.
 	 */
 	public function modify_content( $content ) {
+		// Check if this module is currently enabled before modifying content
+		$settings = Boilerplate_Settings::instance();
+		$enabled_modules = $settings->get( 'enabled_modules', array() );
+
+		// If this module is not in the enabled modules list, return content unchanged
+		if ( ! in_array( 'example-module', $enabled_modules, true ) ) {
+			return $content; // Module is disabled, return content unchanged
+		}
+
 		// Only modify content on single posts
 		if ( is_single() ) {
 			$custom_text = '<p><em>This content was modified by the Example Module.</em></p>';
 			$content = $custom_text . $content;
 		}
-		
+
 		return $content;
 	}
 
@@ -157,6 +173,15 @@ class Boilerplate_Module_ExampleModule {
 	 * @return   string Shortcode output.
 	 */
 	public function example_shortcode( $atts, $content = null ) {
+		// Check if this module is currently enabled before processing the shortcode
+		$settings = Boilerplate_Settings::instance();
+		$enabled_modules = $settings->get( 'enabled_modules', array() );
+
+		// If this module is not in the enabled modules list, return empty string
+		if ( ! in_array( 'example-module', $enabled_modules, true ) ) {
+			return ''; // Module is disabled, don't output anything
+		}
+
 		$atts = shortcode_atts( array(
 			'title' => 'Example Module',
 			'class' => 'example-module',
@@ -195,5 +220,15 @@ class Boilerplate_Module_ExampleModule {
 	 */
 	public function get_version() {
 		return $this->version;
+	}
+
+	/**
+	 * Cleanup the module - remove any registered hooks, shortcodes, etc.
+	 *
+	 * @since    2.0.0
+	 */
+	public function cleanup() {
+		// WordPress doesn't provide methods to remove registered hooks/shortcodes
+		// Perform any other cleanup tasks here if needed
 	}
 }

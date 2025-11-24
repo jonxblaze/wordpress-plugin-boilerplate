@@ -68,6 +68,15 @@ class Boilerplate_Plugin {
 	protected $settings;
 
 	/**
+	 * Admin instance.
+	 *
+	 * @since    2.0.0
+	 * @access   protected
+	 * @var      Boilerplate_Admin    $admin_instance    Admin instance.
+	 */
+	protected $admin_instance;
+
+	/**
 	 * Module manager instance.
 	 *
 	 * @since    2.0.0
@@ -86,10 +95,11 @@ class Boilerplate_Plugin {
 	 * @since    2.0.0
 	 */
 	public function __construct() {
+		$this->load_dependencies();
+
 		$this->plugin_name = Boilerplate_Constants::PLUGIN_NAME;
 		$this->version     = Boilerplate_Constants::VERSION;
 
-		$this->load_dependencies();
 		$this->set_locale();
 		$this->define_admin_hooks();
 		$this->define_public_hooks();
@@ -117,29 +127,29 @@ class Boilerplate_Plugin {
 	 * @access   private
 	 */
 	private function load_dependencies() {
+		$plugin_dir = plugin_dir_path( dirname( __FILE__ ) );
+		
 		// Include utility classes first
-		require_once Boilerplate_Constants::plugin_dir( 'includes/class-boilerplate-constants.php' );
-		require_once Boilerplate_Constants::plugin_dir( 'includes/class-boilerplate-utils.php' );
-		require_once Boilerplate_Constants::plugin_dir( 'includes/class-boilerplate-settings.php' );
-		require_once Boilerplate_Constants::plugin_dir( 'includes/class-boilerplate-upgrade.php' );
-		require_once Boilerplate_Constants::plugin_dir( 'includes/class-boilerplate-module-manager.php' );
+		require_once $plugin_dir . 'includes/class-boilerplate-constants.php';
+		require_once $plugin_dir . 'includes/class-boilerplate-utils.php';
+		require_once $plugin_dir . 'includes/class-boilerplate-settings.php';
+		require_once $plugin_dir . 'includes/class-boilerplate-upgrade.php';
+		require_once $plugin_dir . 'includes/class-boilerplate-module-manager.php';
 
 		// Include the loader
-		require_once Boilerplate_Constants::plugin_dir( 'includes/class-boilerplate-loader.php' );
+		require_once $plugin_dir . 'includes/class-boilerplate-plugin-loader.php';
 		$this->loader = new Boilerplate_Loader();
 
-		// Initialize settings
-		$this->settings = Boilerplate_Settings::instance();
-
-		// Initialize module manager
-		$this->module_manager = Boilerplate_Module_Manager::instance();
+		// Initialize settings and module manager after all dependencies are loaded
+		// These are deferred to avoid circular dependencies
+		add_action( 'plugins_loaded', array( $this, 'init_settings_and_modules' ), 1 );
 
 		// Include internationalization
-		require_once Boilerplate_Constants::plugin_dir( 'includes/class-boilerplate-i18n.php' );
+		require_once $plugin_dir . 'includes/class-boilerplate-plugin-i18n.php';
 
 		// Include admin and public classes
-		require_once Boilerplate_Constants::plugin_dir( 'admin/class-boilerplate-plugin-admin.php' );
-		require_once Boilerplate_Constants::plugin_dir( 'public/class-boilerplate-plugin-public.php' );
+		require_once $plugin_dir . 'admin/class-boilerplate-plugin-admin.php';
+		require_once $plugin_dir . 'public/class-boilerplate-plugin-public.php';
 	}
 
 	/**
@@ -166,18 +176,69 @@ class Boilerplate_Plugin {
 	 * @access   private
 	 */
 	private function define_admin_hooks() {
-		$plugin_admin = new Boilerplate_Admin( $this->get_plugin_name(), $this->get_version(), $this->settings );
+		// Register admin menu immediately (needs to happen early)
+		$this->loader->add_action( 'admin_menu', $this, 'add_admin_menu' );
+
+		// Defer other admin hooks until after settings are initialized
+		add_action( 'plugins_loaded', array( $this, 'init_admin_hooks' ), 2 );
+	}
+
+	/**
+	 * Add admin menu items.
+	 *
+	 * @since    2.0.0
+	 */
+	public function add_admin_menu() {
+		add_options_page(
+			'Boilerplate Plugin Settings',
+			'Boilerplate Plugin',
+			'manage_options',
+			'boilerplate-plugin',
+			array( $this, 'display_admin_page' )
+		);
+	}
+
+	/**
+	 * Display the admin page.
+	 *
+	 * @since    2.0.0
+	 */
+	public function display_admin_page() {
+		// Check if settings are available, if not show a loading message
+		if ( ! $this->settings ) {
+			echo '<div class="wrap"><h1>Boilerplate Plugin Settings</h1>';
+			echo '<p>Settings are still loading. Please refresh the page.</p>';
+			echo '</div>';
+			return;
+		}
+
+		// Ensure admin instance is available and settings are registered
+		if ( ! $this->admin_instance ) {
+			// Initialize admin hooks if not already done (this should normally be done in init_admin_hooks)
+			$this->init_admin_hooks();
+		}
+
+		// Use the same admin instance that was used to register settings
+		$this->admin_instance->display_admin_page();
+	}
+
+	/**
+	 * Initialize admin hooks after settings are loaded.
+	 *
+	 * @since    2.0.0
+	 */
+	public function init_admin_hooks() {
+		$this->admin_instance = new Boilerplate_Admin( $this->get_plugin_name(), $this->get_version(), $this->settings );
 
 		// Enqueue styles and scripts
-		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
-		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
+		$this->loader->add_action( 'admin_enqueue_scripts', $this->admin_instance, 'enqueue_styles' );
+		$this->loader->add_action( 'admin_enqueue_scripts', $this->admin_instance, 'enqueue_scripts' );
 
-		// Admin menu and settings
-		$this->loader->add_action( 'admin_menu', $plugin_admin, 'add_admin_menu' );
-		$this->loader->add_action( 'admin_init', $plugin_admin, 'init_settings' );
+		// Admin settings initialization
+		$this->loader->add_action( 'admin_init', $this->admin_instance, 'init_settings' );
 
 		// Admin notices
-		$this->loader->add_action( 'admin_notices', $plugin_admin, 'admin_notices' );
+		$this->loader->add_action( 'admin_notices', $this->admin_instance, 'admin_notices' );
 	}
 
 	/**
@@ -208,9 +269,42 @@ class Boilerplate_Plugin {
 	private function define_hooks() {
 		// Handle upgrades on plugin activation/initialization
 		$this->loader->add_action( 'plugins_loaded', $this, 'maybe_upgrade' );
-		
+
 		// Initialize modules after plugins are loaded
 		$this->loader->add_action( 'plugins_loaded', $this, 'init_modules' );
+
+		// Register allowed_options filter early to ensure it's available when options.php processes form submissions
+		$this->loader->add_action( 'init', $this, 'register_allowed_options' );
+	}
+
+	/**
+	 * Register allowed options to whitelist the settings.
+	 *
+	 * @since    2.0.0
+	 */
+	public function register_allowed_options() {
+		// Add the allowed options filter
+		add_filter( 'allowed_options', array( $this, 'allowed_options_filter' ) );
+	}
+
+	/**
+	 * Add allowed options to whitelist the settings.
+	 *
+	 * @since    2.0.0
+	 */
+	public function allowed_options_filter( $allowed_options ) {
+		$allowed_options['boilerplate-plugin'] = array( Boilerplate_Constants::OPTION_NAME );
+		return $allowed_options;
+	}
+
+	/**
+	 * Initialize settings and module manager instances.
+	 *
+	 * @since    2.0.0
+	 */
+	public function init_settings_and_modules() {
+		$this->settings = Boilerplate_Settings::instance();
+		$this->module_manager = Boilerplate_Module_Manager::instance();
 	}
 
 	/**

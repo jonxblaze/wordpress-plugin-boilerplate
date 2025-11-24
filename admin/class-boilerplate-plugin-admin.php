@@ -114,12 +114,15 @@ class Boilerplate_Admin {
 	 * @since    2.0.0
 	 */
 	public function display_admin_page() {
+		// Ensure settings are initialized before displaying the page
+		$this->init_settings();
+
 		?>
 		<div class="wrap">
 			<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
 			<form method="post" action="options.php">
 				<?php
-				settings_fields( 'boilerplate_settings' );
+				settings_fields( 'boilerplate-plugin' );
 				do_settings_sections( 'boilerplate-plugin' );
 				submit_button();
 				?>
@@ -134,8 +137,9 @@ class Boilerplate_Admin {
 	 * @since    2.0.0
 	 */
 	public function init_settings() {
-		register_setting( 
-			'boilerplate_settings', 
+		// Whitelist our options page (this is now handled in main plugin class)
+		register_setting(
+			'boilerplate-plugin',
 			Boilerplate_Constants::OPTION_NAME,
 			array(
 				'sanitize_callback' => array( $this, 'sanitize_settings' )
@@ -143,19 +147,12 @@ class Boilerplate_Admin {
 		);
 
 		add_settings_section(
-			'boilerplate_main_settings',
-			'Main Settings',
+			'boilerplate_general_settings',
+			'General Settings',
 			array( $this, 'settings_section_callback' ),
 			'boilerplate-plugin'
 		);
 
-		add_settings_field(
-			'example_setting',
-			'Example Setting',
-			array( $this, 'example_setting_callback' ),
-			'boilerplate-plugin',
-			'boilerplate_main_settings'
-		);
 
 		// Module Management Section
 		add_settings_section(
@@ -183,20 +180,6 @@ class Boilerplate_Admin {
 		echo '<p>Configure your Boilerplate Plugin settings here.</p>';
 	}
 
-	/**
-	 * Example setting field callback.
-	 *
-	 * @since    2.0.0
-	 */
-	public function example_setting_callback() {
-		$settings = $this->settings->get( 'example_setting', 'default_value' );
-		?>
-		<input type="text" name="<?php echo esc_attr( Boilerplate_Constants::OPTION_NAME ); ?>[example_setting]" 
-			   value="<?php echo esc_attr( $settings ); ?>" 
-			   class="regular-text" />
-		<p class="description">An example setting field.</p>
-		<?php
-	}
 
 	/**
 	 * Module settings section callback.
@@ -216,23 +199,25 @@ class Boilerplate_Admin {
 		$enabled_modules = $this->settings->get( 'enabled_modules', array() );
 		$module_manager = Boilerplate_Module_Manager::instance();
 		$available_modules = $this->get_available_modules();
-		
+
 		if ( empty( $available_modules ) ) {
 			echo '<p>No modules found in the modules directory.</p>';
 			return;
 		}
-		
+
 		foreach ( $available_modules as $module_name => $module_info ) {
 			$is_enabled = in_array( $module_name, $enabled_modules, true );
 			$is_loaded = $module_manager->has_module( $module_name );
-			$status_class = $is_loaded ? 'module-status-loaded' : 'module-status-disabled';
-			$status_text = $is_loaded ? '✓ Loaded' : '✗ Disabled';
+			// Use $is_enabled (the saved setting) rather than $is_loaded (current runtime state) for visual status
+			// This provides immediate feedback after saving settings
+			$status_class = $is_enabled ? 'module-status-loaded' : 'module-status-disabled';
+			$status_text = $is_enabled ? '✓ Enabled' : '✗ Disabled';
 			?>
 			<div class="module-checkbox-wrapper">
 				<label>
-					<input type="checkbox" 
-						   name="<?php echo esc_attr( Boilerplate_Constants::OPTION_NAME ); ?>[enabled_modules][]" 
-						   value="<?php echo esc_attr( $module_name ); ?>" 
+					<input type="checkbox"
+						   name="<?php echo esc_attr( Boilerplate_Constants::OPTION_NAME ); ?>[enabled_modules][]"
+						   value="<?php echo esc_attr( $module_name ); ?>"
 						   <?php checked( $is_enabled ); ?> />
 					<strong><?php echo esc_html( $module_info['name'] ); ?></strong>
 					<span class="module-status <?php echo esc_attr( $status_class ); ?>"><?php echo esc_html( $status_text ); ?></span>
@@ -254,17 +239,17 @@ class Boilerplate_Admin {
 	private function get_available_modules() {
 		$modules = array();
 		$modules_dir = Boilerplate_Constants::plugin_dir( 'modules' );
-		
+
 		if ( ! is_dir( $modules_dir ) ) {
 			return $modules;
 		}
-		
+
 		$module_dirs = glob( $modules_dir . '/*', GLOB_ONLYDIR );
-		
+
 		foreach ( $module_dirs as $module_dir ) {
 			$module_name = basename( $module_dir );
 			$module_file = $module_dir . '/class-boilerplate-module-' . $module_name . '.php';
-			
+
 			if ( file_exists( $module_file ) ) {
 				$modules[ $module_name ] = array(
 					'name' => $this->format_module_name( $module_name ),
@@ -272,7 +257,7 @@ class Boilerplate_Admin {
 				);
 			}
 		}
-		
+
 		return $modules;
 	}
 
@@ -300,9 +285,31 @@ class Boilerplate_Admin {
 		$default_headers = array(
 			'description' => 'Description',
 		);
-		
+
 		$file_data = get_file_data( $module_file, $default_headers );
-		return $file_data['description'] ?? '';
+		$description = $file_data['description'] ?? '';
+
+		// If no description from file header, try to get it from PHPDoc comment
+		if ( empty( $description ) ) {
+			$content = file_get_contents( $module_file );
+			if ( preg_match( '/\*\s*@description\s*(.*?)(?:\n\s*\*|\*\/)/s', $content, $matches ) ) {
+				$description = trim( $matches[1] );
+			}
+		}
+
+		return $description;
+	}
+
+	/**
+	 * Whitelist our options page for the settings API.
+	 *
+	 * @since    2.0.0
+	 * @param    array $allowed_options The allowed options.
+	 * @return   array Modified allowed options.
+	 */
+	public function allowed_options( $allowed_options ) {
+		$allowed_options['boilerplate-plugin'] = array( Boilerplate_Constants::OPTION_NAME );
+		return $allowed_options;
 	}
 
 	/**
@@ -326,7 +333,36 @@ class Boilerplate_Admin {
 			}
 		}
 		
+		// Reload modules after settings are saved - reload immediately to ensure changes take effect
+		$this->reload_modules_after_save();
+
 		return $sanitized_input;
+	}
+
+	/**
+	 * Reload modules after settings are saved.
+	 *
+	 * @since    2.0.0
+	 */
+	public function reload_modules_after_save() {
+		$module_manager = Boilerplate_Module_Manager::instance();
+		$module_manager->reload_modules();
+		
+		// Add success message for next page load
+		add_action( 'admin_notices', array( $this, 'show_module_reload_success' ) );
+	}
+
+	/**
+	 * Show success message after modules are reloaded.
+	 *
+	 * @since    2.0.0
+	 */
+	public function show_module_reload_success() {
+		?>
+		<div class="notice notice-success is-dismissible">
+			<p><?php esc_html_e( 'Module settings updated successfully. Modules have been reloaded.', 'boilerplate-plugin' ); ?></p>
+		</div>
+		<?php
 	}
 
 	/**

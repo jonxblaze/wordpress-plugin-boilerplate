@@ -19,7 +19,7 @@ class Boilerplate_Constants {
 	/**
 	 * Plugin version.
 	 */
-	const VERSION = '2.0.0';
+	const VERSION = '2.0.1';
 
 	/**
 	 * Plugin name (slug).
@@ -34,7 +34,7 @@ class Boilerplate_Constants {
 	/**
 	 * Database option name for storing plugin settings.
 	 */
-	const OPTION_NAME = 'boilerplate_settings';
+	const OPTION_NAME = 'boilerplate_plugin_options';
 
 	/**
 	 * Database option name for storing plugin version.

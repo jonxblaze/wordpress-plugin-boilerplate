@@ -15,7 +15,7 @@
  * Plugin Name:       Boilerplate Plugin
  * Plugin URI:        https://example.com/plugins/boilerplate-plugin/
  * Description:       A clean, reusable boilerplate for WordPress plugins following best practices. Version 2.0 includes improved architecture, settings management, and upgrade handling.
- * Version:           2.0.0
+ * Version:           2.0.1
  * Requires at least: 5.0
  * Requires PHP:      7.0
  * Author:            Your Name
@@ -31,22 +31,25 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
+// Load required dependencies for activation
+require_once plugin_dir_path( __FILE__ ) . 'includes/class-boilerplate-constants.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/class-boilerplate-utils.php';
 
 /**
  * The code that runs during plugin activation.
- * This action is documented in includes/class-boilerplate-activator.php
+ * This action is documented in includes/class-boilerplate-plugin-activator.php
  */
 function activate_boilerplate_plugin() {
-	require_once plugin_dir_path( __FILE__ ) . 'includes/class-boilerplate-activator.php';
+	require_once plugin_dir_path( __FILE__ ) . 'includes/class-boilerplate-plugin-activator.php';
 	Boilerplate_Activator::activate();
 }
 
 /**
  * The code that runs during plugin deactivation.
- * This action is documented in includes/class-boilerplate-deactivator.php
+ * This action is documented in includes/class-boilerplate-plugin-deactivator.php
  */
 function deactivate_boilerplate_plugin() {
-	require_once plugin_dir_path( __FILE__ ) . 'includes/class-boilerplate-deactivator.php';
+	require_once plugin_dir_path( __FILE__ ) . 'includes/class-boilerplate-plugin-deactivator.php';
 	Boilerplate_Deactivator::deactivate();
 }
 
